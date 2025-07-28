@@ -8,8 +8,11 @@ int main(int argc, char **argv) {
     auto kLogger = node->get_logger();
 
     std::map<std::string, uint16_t> kCoils = {
-        { "M1", 0x0801},
-        { "M2", 0x0802},
+        {"M1", 0x0801},
+        {"M2", 0x0802},
+    };
+
+    std::map<std::string, uint16_t> kInputBits = {
         {"X20", 0x0416},
         {"X21", 0x0417},
         {"X22", 0x0418},
@@ -20,9 +23,18 @@ int main(int argc, char **argv) {
     };
     while (rclcpp::ok()) {
       for (auto &[name, address] : kCoils) {
-        uint16_t data[3];
-        if (!node->read_holding_registers(address, 1, data)) {
+        uint8_t data[3];
+        if (!node->read_coils(address, 1, data)) {
           RCLCPP_ERROR(kLogger, "Failed to read coils");
+          continue;
+        }
+        RCLCPP_INFO(kLogger, "%s: %02X", name.c_str(), data[0] & 0x01);
+      }
+
+      for (auto &[name, address] : kInputBits) {
+        uint8_t data[3];
+        if (!node->read_input_bits(address, 1, data)) {
+          RCLCPP_ERROR(kLogger, "Failed to read input bits");
           continue;
         }
         RCLCPP_INFO(kLogger, "%s: %02X", name.c_str(), data[0] & 0x01);

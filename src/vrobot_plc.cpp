@@ -52,6 +52,25 @@ bool VrobotPLC::read_coils(uint16_t address, uint16_t count, uint8_t *data) {
   return true;
 }
 
+bool VrobotPLC::read_input_bits(uint16_t address, uint16_t count,
+                                uint8_t *data) {
+  if (!mb) {
+    RCLCPP_ERROR(this->get_logger(), "Modbus context not initialized");
+    return false;
+  }
+  try {
+    int rc = modbus_read_input_bits(mb, address, count, data);
+    if (rc == -1) {
+      RCLCPP_ERROR(this->get_logger(), "Unable to read input bits");
+      return false;
+    }
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to read input bits: %s", e.what());
+    return false;
+  }
+  return true;
+}
+
 bool VrobotPLC::write_coils(uint16_t address, uint16_t count, uint8_t *data) {
   if (!mb) {
     RCLCPP_ERROR(this->get_logger(), "Modbus context not initialized");

@@ -15,6 +15,9 @@ public:
   bool read_coils(uint16_t address, uint16_t count, uint8_t *data);
   bool write_coils(uint16_t address, uint16_t count, uint8_t *data);
 
+  bool read_input_bits(uint16_t address, uint16_t count, uint8_t *data);
+  bool write_input_bits(uint16_t address, uint16_t count, uint8_t *data);
+
   bool read_holding_registers(uint16_t address, uint16_t count, uint16_t *data);
   bool write_holding_registers(uint16_t address, uint16_t count,
                                uint16_t *data);
