@@ -27,6 +27,10 @@ bool VrobotPLC::init_modbus() {
   }
   modbus_set_response_timeout(mb, timeout, 0);
   modbus_set_slave(mb, slave_id);
+  if (modbus_connect(mb) == -1) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to connect to the modbus server");
+    return false;
+  }
   return true;
 }
 
