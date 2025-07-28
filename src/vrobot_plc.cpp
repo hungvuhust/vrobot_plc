@@ -5,7 +5,10 @@
 namespace vrobot_plc {
 VrobotPLC::VrobotPLC() : Node("vrobot_plc") {
   RCLCPP_INFO(this->get_logger(), "VrobotPLC node initialized");
-  init_modbus();
+  if (!init_modbus()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize modbus");
+    throw std::runtime_error("Failed to initialize modbus");
+  }
 }
 
 VrobotPLC::~VrobotPLC() {

@@ -2,22 +2,22 @@
 
 int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<vrobot_plc::VrobotPLC>();
 
-  std::map<std::string, uint16_t> kCoils = {
-      { "M1", 0x0801},
-      { "M2", 0x0802},
-      {"X20", 0x0416},
-      {"X21", 0x0417},
-      {"X22", 0x0418},
-  };
-
-  std::map<std::string, uint16_t> kHoldingRegisters = {
-      {"D0", 0x1000},
-  };
-
-  auto kLogger = node->get_logger();
   try {
+    auto node    = std::make_shared<vrobot_plc::VrobotPLC>();
+    auto kLogger = node->get_logger();
+
+    std::map<std::string, uint16_t> kCoils = {
+        { "M1", 0x0801},
+        { "M2", 0x0802},
+        {"X20", 0x0416},
+        {"X21", 0x0417},
+        {"X22", 0x0418},
+    };
+
+    std::map<std::string, uint16_t> kHoldingRegisters = {
+        {"D0", 0x1000},
+    };
     while (rclcpp::ok()) {
       for (auto &[name, address] : kCoils) {
         uint8_t data[3];
