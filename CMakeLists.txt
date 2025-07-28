@@ -36,7 +36,9 @@ target_link_libraries(test_read_write vrobot_plc)
 
 install(TARGETS
   vrobot_plc
-  DESTINATION lib/${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 
