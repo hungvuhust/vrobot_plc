@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     };
 
     std::map<std::string, uint16_t> kHoldingRegisters = {
-        {"D0", 0x1000},
+        {"D4", 0x1004},
     };
     while (rclcpp::ok()) {
       for (auto &[name, address] : kCoils) {
