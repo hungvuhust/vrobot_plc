@@ -8,15 +8,15 @@ int main(int argc, char **argv) {
     auto kLogger = node->get_logger();
 
     std::map<std::string, uint16_t> kCoils = {
-        { "M1", 2049},
-        { "M2", 2050},
-        {"X20", 1046},
-        {"X21", 1047},
-        {"X22", 1048},
+        { "M1", 0x0801},
+        { "M2", 0x0802},
+        {"X20", 0x0416},
+        {"X21", 0x0417},
+        {"X22", 0x0418},
     };
 
     std::map<std::string, uint16_t> kHoldingRegisters = {
-        {"D4", 4100},
+        {"D4", 0x1004},
     };
     while (rclcpp::ok()) {
       for (auto &[name, address] : kCoils) {
