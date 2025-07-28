@@ -20,8 +20,8 @@ int main(int argc, char **argv) {
     };
     while (rclcpp::ok()) {
       for (auto &[name, address] : kCoils) {
-        uint8_t data[3];
-        if (!node->read_coils(address, 1, data)) {
+        uint16_t data[3];
+        if (!node->read_holding_registers(address, 1, data)) {
           RCLCPP_ERROR(kLogger, "Failed to read coils");
           continue;
         }
