@@ -5,9 +5,20 @@
 namespace vrobot_plc {
 VrobotPLC::VrobotPLC() : Node("vrobot_plc") {
   RCLCPP_INFO(this->get_logger(), "VrobotPLC node initialized");
+
+  if (!init_params()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize parameters");
+    throw std::runtime_error("Failed to initialize parameters");
+  }
+
   if (!init_modbus()) {
     RCLCPP_ERROR(this->get_logger(), "Failed to initialize modbus");
     throw std::runtime_error("Failed to initialize modbus");
+  }
+
+  if (!init_node()) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize node");
+    throw std::runtime_error("Failed to initialize node");
   }
 }
 
@@ -31,6 +42,42 @@ bool VrobotPLC::init_modbus() {
     RCLCPP_ERROR(this->get_logger(), "Unable to connect to the modbus server");
     return false;
   }
+  return true;
+}
+
+bool VrobotPLC::init_node() {
+  // Publisher
+  plc_status_publisher_ =
+      this->create_publisher<PlcStatus>(kPlcStatusTopic, 10);
+
+  // Subscriber
+  led_control_subscriber_ = this->create_subscription<LedControl>(
+      kLedControlTopic, 10,
+      std::bind(&VrobotPLC::led_control_callback, this, std::placeholders::_1));
+
+  // Timer
+  timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
+                                   std::bind(&VrobotPLC::timer_callback, this));
+  return true;
+}
+
+bool VrobotPLC::init_params() {
+  this->declare_parameter("modbus_tcp_ip", "192.168.10.2");
+  this->declare_parameter("modbus_tcp_port", 502);
+  this->declare_parameter("modbus_tcp_slave_id", 1);
+  this->declare_parameter("modbus_tcp_timeout", 1000);
+
+  this->get_parameter("modbus_tcp_ip", ip);
+  this->get_parameter("modbus_tcp_port", port);
+  this->get_parameter("modbus_tcp_slave_id", slave_id);
+  this->get_parameter("modbus_tcp_timeout", timeout);
+
+  RCLCPP_INFO(this->get_logger(), "Modbus parameters initialized");
+  RCLCPP_INFO(this->get_logger(), "Modbus IP: %s", ip.c_str());
+  RCLCPP_INFO(this->get_logger(), "Modbus port: %d", port);
+  RCLCPP_INFO(this->get_logger(), "Modbus slave ID: %d", slave_id);
+  RCLCPP_INFO(this->get_logger(), "Modbus timeout: %d", timeout);
+
   return true;
 }
 
@@ -127,6 +174,47 @@ bool VrobotPLC::write_holding_registers(uint16_t address, uint16_t count,
     return false;
   }
   return true;
+}
+
+void VrobotPLC::timer_callback() {
+  try {
+    PlcStatus msg;
+    msg.header.stamp = this->now();
+
+    uint8_t data[1];
+    if (!read_coils(kEmgButtonAddress, 1, data)) {
+      RCLCPP_ERROR(this->get_logger(), "Unable to read emg button");
+      return;
+    }
+    msg.is_emg = data[0] & 0x01;
+
+    if (!read_input_bits(kFrontSafetyAddress, 1, data)) {
+      RCLCPP_ERROR(this->get_logger(), "Unable to read front safety");
+      return;
+    }
+    msg.is_front_safety = data[0] & 0x01;
+
+    if (!read_input_bits(kBackSafetyAddress, 1, data)) {
+      RCLCPP_ERROR(this->get_logger(), "Unable to read back safety");
+      return;
+    }
+    msg.is_back_safety = data[0] & 0x01;
+
+    plc_status_publisher_->publish(msg);
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to read plc status: %s", e.what());
+  }
+}
+
+void VrobotPLC::led_control_callback(const LedControl::SharedPtr msg) {
+  try {
+    uint8_t data[1];
+    data[0] = msg->led_id;
+    write_coils(kLedAddress, 1, data);
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(this->get_logger(), "Unable to write led control: %s",
+                 e.what());
+  }
 }
 
 } // namespace vrobot_plc
