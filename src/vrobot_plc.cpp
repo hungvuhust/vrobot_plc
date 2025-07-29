@@ -269,8 +269,8 @@ void VrobotPLC::timer_callback() {
       operation_success = false;
     } else {
       msg.is_emg          = ((data_x[0]) & 0xFFFF) == 30;
-      msg.is_front_safety = ((data_x[1]) & 0xFFFF) == 1001;
-      msg.is_back_safety  = ((data_x[2]) & 0xFFFF) == 1001;
+      msg.is_back_safety  = ((data_x[1]) & 0xFFFF) == 1001;
+      msg.is_front_safety = ((data_x[2]) & 0xFFFF) == 1001;
     }
 
     uint8_t data_m[2];
