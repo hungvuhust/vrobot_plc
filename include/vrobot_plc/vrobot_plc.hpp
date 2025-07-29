@@ -23,6 +23,11 @@ private:
   bool init_node();
   bool init_params();
 
+  // Connection retry functions
+  bool reconnect_modbus();
+  bool is_connection_alive();
+  void reset_failure_counter();
+
   // Modbus functions
   bool read_coils(uint16_t address, uint16_t count, uint8_t *data);
   bool write_coils(uint16_t address, uint16_t count, uint8_t *data);
@@ -41,6 +46,15 @@ private:
   std::string ip       = "192.168.10.2";
   int         timeout  = 1000;
 
+  // Retry connection parameters
+  int max_connection_retries    = 5;
+  int retry_delay_ms            = 1000;
+  int max_consecutive_failures_ = 10;
+
+  // Connection state tracking
+  int  consecutive_failure_count_ = 0;
+  bool is_connected_              = false;
+
   // Timer
   rclcpp::TimerBase::SharedPtr timer_;
   void                         timer_callback();
@@ -50,6 +64,7 @@ private:
 
   // Subscriber
   rclcpp::Subscription<LedControl>::SharedPtr led_control_subscriber_;
-  void led_control_callback(const LedControl::SharedPtr msg);
+  void                 led_control_callback(const LedControl::SharedPtr msg);
+  std::atomic<uint8_t> led_control_data{0};
 };
 } // namespace vrobot_plc

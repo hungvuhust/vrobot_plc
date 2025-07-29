@@ -6,3 +6,8 @@ vrobot_plc_node:
     modbus_tcp_slave_id: 1
     modbus_tcp_timeout: 1000
     modbus_tcp_retry_count: 3
+    
+    # Retry connection parameters
+    max_connection_retries: 5
+    retry_delay_ms: 1000
+    max_consecutive_failures: 10
