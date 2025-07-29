@@ -263,14 +263,14 @@ void VrobotPLC::timer_callback() {
     msg.header.stamp       = this->now();
     bool operation_success = true;
 
-    uint8_t data_x[3];
-    if (!read_input_bits(kEmgButtonAddress, 3, data_x)) {
+    uint16_t data_x[3];
+    if (!read_holding_registers(kEmgButtonAddress, 3, data_x)) {
       RCLCPP_ERROR(this->get_logger(), "Unable to read emg button");
       operation_success = false;
     } else {
-      msg.is_emg          = data_x[0] & 0x01;
-      msg.is_front_safety = data_x[1] & 0x01;
-      msg.is_back_safety  = data_x[2] & 0x01;
+      msg.is_emg          = ((data_x[0]) & 0xFFFF) == 30;
+      msg.is_front_safety = ((data_x[1]) & 0xFFFF) == 1001;
+      msg.is_back_safety  = ((data_x[2]) & 0xFFFF) == 1001;
     }
 
     uint8_t data_m[2];
